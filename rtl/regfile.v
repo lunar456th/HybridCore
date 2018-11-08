@@ -1,5 +1,6 @@
 /*
 	Name				:	Register File Module
+	File				:	regfile.v
 	Word size			:	16-bit
 	Number of registers	:	32
 	Total size			:	64 Bytes
@@ -16,7 +17,7 @@ module regfile (
 	input wire [4:0] w_idx,
 	input wire [15:0] w_data,
 	output reg [15:0] r_data_a,
-	output reg [15:0] r_data_b,
+	output reg [15:0] r_data_b
 	);
 	
 	reg [15:0] register[0:31];

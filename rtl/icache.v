@@ -1,5 +1,6 @@
 /*
 	Name			:	Instruction Cache Memory Module
+	File			:	icache.v
 	Word size		:	16-bit
 	Number of words	:	256
 	Total size		:	1K Bytes
@@ -8,6 +9,7 @@
 
 module icache (
 	input wire clk,
+	input wire reset,
 	input wire r_en,
 	input wire [15:0] addr,
 	output reg [15:0] data
