@@ -32,8 +32,8 @@ module operand_fetch (
 	output reg [15:0] of_ex_operand_b,
 	output wire [3:0] of_ex_branch_cond,
 	output wire [4:0] of_ex_pc,
-	output wire of_ex_has_writeback
-	output wire [4:0] of_ex_reg_idx_dst,
+	output wire of_ex_has_writeback,
+	output wire [4:0] of_ex_reg_idx_dst
 
 	);
 	
@@ -43,7 +43,7 @@ module operand_fetch (
 	assign of_ex_op = id_of_op;
 	assign of_ex_branch_cond = id_of_branch_cond;
 	assign of_ex_pc = id_of_pc;
-	assign of_ex_has_writeback = of_ex_has_writeback;
+	assign of_ex_has_writeback = id_of_has_writeback;
 	assign of_ex_reg_idx_dst = id_of_reg_idx_a;
 	
 	always @ (posedge clk or negedge reset)

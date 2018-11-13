@@ -4,6 +4,8 @@
 	Word size	:	16-bit
 */
 
+`include "defines.v"
+
 module writeback (
 	input wire clk,
 	input wire reset,
@@ -13,6 +15,7 @@ module writeback (
 	input wire [4:0] ex_wb_reg_idx_dst,
 	input wire [4:0] ex_wb_op,
 	input wire [15:0] ex_wb_operand_b,
+	input wire ex_wb_has_writeback,
 	
 	output reg reg_w_en,
 	output reg [15:0] reg_w_idx,
@@ -27,47 +30,20 @@ module writeback (
 	output reg wb_ex_has_bypass
 	);
 	
-	parameter REG_R0 0;
-	parameter REG_R1 1;
-	parameter REG_R2 2;
-	parameter REG_R3 3;
-	parameter REG_R4 4;
-	parameter REG_R5 5;
-	parameter REG_R6 6;
-	parameter REG_R7 7;
-	parameter REG_R8 8;
-	parameter REG_R9 9;
-	parameter REG_R10 10;
-	parameter REG_R11 11;
-	parameter REG_R12 12;
-	parameter REG_R13 13;
-	parameter REG_R14 14;
-	parameter REG_R15 15;
-	parameter REG_R16 16;
-	parameter REG_R17 17;
-	parameter REG_R18 18;
-	parameter REG_R19 19;
-	parameter REG_R20 20;
-	parameter REG_R21 21;
-	parameter REG_R22 22;
-	parameter REG_R23 23;
-	parameter REG_R24 24;
-	parameter REG_R25 25;
-	parameter REG_R26 26;
-	parameter REG_R27 27;
-	parameter REG_SP 28;
-	parameter REG_BP 29;
-	parameter REG_PC 30;
-	parameter REG_CPSR 31;
-	
 	always @ (posedge clk or negedge reset)
 	begin
 		if (~reset)
 		begin
-			
+			wb_ex_bypass_reg <= 0;
+			wb_ex_bypass_value <= 0;
+			wb_ex_has_bypass <= 0;
 		end
 		else
 		begin
+			wb_ex_bypass_reg <= ex_wb_reg_idx_dst;
+			wb_ex_bypass_value <= ex_wb_result;
+			wb_ex_has_bypass <= ex_wb_has_writeback;
+
 			casex (ex_wb_op)
 				5'b00xxx, 5'b010xx, 5'b0110x, 5'b01110: // ALU except CMP
 				5'b10000: // MOV 
@@ -95,6 +71,7 @@ module writeback (
 					mem_w_data = ex_wb_result;
 				end
 				default:; /////////
+			endcase
 		end
 	end
 	

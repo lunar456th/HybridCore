@@ -1,5 +1,5 @@
 /*
-	Name			:	The top of micropreocessor
+	Name			:	The top of alphacore
 	File			:	top.v
 	Word size		:	16-bit
 	Components		:	Datapath Unit, Control Unit

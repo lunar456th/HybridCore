@@ -1,5 +1,3 @@
-// 1. 사용할 가산기, 승산기, 제산기, 쉬프터 import하기
-
 /*
 	Name		:	Arithmetic Logic Unit
 	File		:	alu.v
@@ -11,6 +9,8 @@
 	Shifter		:	Fast Shifter
 */
 
+`include "defines.v"
+
 module alu (
 	input wire [4:0] op,
 	input wire [15:0] a,
@@ -19,44 +19,32 @@ module alu (
 	output reg [3:0] nzcv
 	);
 	
-	// Arithmetic Operations
-	parameter OP_ADD = 5'b00000;
-	parameter OP_SUB = 5'b00001;
-	parameter OP_MUL = 5'b00010;
-	parameter OP_DIV = 5'b00011;
-	// Logic Operations
-	parameter OP_AND = 5'b00100;
-	parameter OP_NAND = 5'b00101;
-	parameter OP_OR = 5'b00110;
-	parameter OP_NOR = 5'b00111;
-	parameter OP_XOR = 5'b01000;
-	parameter OP_XNOR = 5'b01001;
-	// Shift Operations
-	parameter OP_SHL = 5'b01010;
-	parameter OP_SHR = 5'b01011;
-	parameter OP_ROL = 5'b01100;
-	parameter OP_ROR = 5'b01101;
-	parameter OP_ASR = 5'b01110;
-	// Comparation Operations
-	parameter OP_CMP = 5'b01111;
-	
-	reg n, z, cout, v;
+	reg n, z, c_out, v, c_out_prev;
+	wire [31:0] result_mul;
 	
 	always @(*)
 	begin
 		case (op)
 			OP_ADD:
 			begin
-				adder adder(a, b, 0, result, cout);
+				adder adder(a, b, 1'b0, result, c_out, c_out_prev);
 				n <= result[15];
 				z <= result == 0;
-				c <= cout;
-				v <= 0 //까먹음
+				c <= c_out;
+				v <= c_out ^ c_out_prev; ///
+			end
 			OP_SUB:
-				adder adder(a, (~b) + 1, 1, result, cout); // 맞나?
-				result = a - b; //
+			OP_CMP:
+			begin
+				adder adder(a, (~b) + 16'd1, 1'b1, result, c_out, c_out_prev);
+				n <= result[15];
+				z <= result == 0;
+				c <= c_out;
+				v <= c_out ^ c_out_prev; ///
+			end
 			OP_MUL:
-				result = a * b; //
+				multiplier multiplier(a, b, result_mul); // always 안에서 모듈을 부를 수 있나???
+				result <= result_mul[15:0];
 			OP_DIV:
 				result = a / b; //
 			OP_AND:
@@ -81,8 +69,6 @@ module alu (
 				result = { a[0], a[7:1] };
 			OP_ASR:
 				result = { a[7], a[7:0] };
-			OP_CMP:
-				result = a - b; ///////////
 			default:;
 		endcase
 	end
