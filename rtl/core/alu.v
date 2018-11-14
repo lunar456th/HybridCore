@@ -20,7 +20,7 @@ module alu (
 	);
 	
 	reg n, z, c_out, v, c_out_prev;
-	wire [31:0] result_mul;
+	wire [31:0] result_mul_div;
 	
 	always @(*)
 	begin
@@ -43,10 +43,11 @@ module alu (
 				v <= c_out ^ c_out_prev; ///
 			end
 			OP_MUL:
-				multiplier multiplier(a, b, result_mul); // always 안에서 모듈을 부를 수 있나???
-				result <= result_mul[15:0];
+				multiplier multiplier(a, b, result_mul_div); // always 안에서 모듈을 부를 수 있나???
+				result <= result_mul_div[15:0];
 			OP_DIV:
-				result = a / b; //
+				divider divider(a, b, result_mul_div); // always 안에서 모듈을 부를 수 있나???
+				result <= result_mul_div[15:0];
 			OP_AND:
 				result = a & b;
 			OP_NAND:
