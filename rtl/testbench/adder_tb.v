@@ -1,6 +1,6 @@
 `default_nettype none
 
-module ksa_tb ();
+module adder_tb ();
 	reg [15:0] a;
 	reg [15:0] b;
 	reg c_in;
@@ -12,13 +12,7 @@ module ksa_tb ();
 	integer num_correct;
 	integer num_wrong;
 	
-	ksa_top ksa_top(
-	    .a(a),
-	    .b(b),
-	    .c_in(c_in),
-	    .s(s),
-	    .c_out(c_out)
-	);
+	adder adder(a, b, c_in, s, c_out);
 	
 	initial
 	begin
@@ -26,10 +20,10 @@ module ksa_tb ();
 		num_correct = 0;
 		num_wrong = 0;
 
-		for (i = 0; i < 1024; i = i + 1)
+		for (i = 0; i < 65536; i = i + 1)
 		begin
 			a = i;
-			for (j = 0; j < 1024; j = j + 1)
+			for (j = 0; j < 65536; j = j + 1)
 			begin
 				b = j;
 				for (k = 0; k < 2; k = k + 1)
