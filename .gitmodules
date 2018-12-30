@@ -1,0 +1,3 @@
+[submodule "MIG_ExternalMemoryInterface"]
+	path = MIG_ExternalMemoryInterface
+	url = https://github.com/lunar456th/MIG_ExternalMemoryInterface.git
