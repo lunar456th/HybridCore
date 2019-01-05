@@ -8,10 +8,10 @@ module DataMemory (
 	input wire Mem_Read,
 	output wire [31:0] Read_data
 	);
-	
+
 	reg [15:0] memory[0:31];
 	integer i;
-	
+
 	initial
 	begin
 		memory[0] <= 16'h0;
@@ -27,14 +27,14 @@ module DataMemory (
 			memory[i] <= 16'h0;
 		end
 	end
-	
+
 	always @ (Address)
 	begin
 		if (Mem_Write)
 		begin
 			memory[Address] <= Write_data;
 		end
-		
+
 		if (Mem_Read)
 		begin
 			Read_data <= memory[Address];

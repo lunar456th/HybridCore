@@ -19,13 +19,13 @@
 module Core (
 	input clk,
 	input reset,
-    input core_enable,
-    output core_request,
-    output [31:0] memory_addr,
-    output memory_rden,
-    output memory_wren,
-    input [31:0] memory_read_val,
-    output [31:0] memory_write_val
+	input core_enable,
+	output core_request,
+	output [31:0] memory_addr,
+	output memory_rden,
+	output memory_wren,
+	input [31:0] memory_read_val,
+	output [31:0] memory_write_val
 	);
 
 	// Fetch Wire Declarations
@@ -71,7 +71,7 @@ module Core (
 	wire EXEMem_in;
 
 	wire [1:0] FwdOut_A, FwdOut_B;
-	
+
 	// Control Wire Declarations
 	wire [5:0] Opcode;
 	wire jmp, bne, imm, andi, ori, addi, ls;
@@ -89,10 +89,10 @@ module Core (
 	wire push_andi, push_ori, push_addi;
 
 	reg push_andi_tmp, push_ori_tmp, push_addi_tmp, push_ls;
-	
+
 	//---//
 
-	
+
 	// Assignments
 	assign PC_In = PC + 1;
 	assign PC_Next = PC_In;

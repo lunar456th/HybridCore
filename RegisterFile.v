@@ -57,7 +57,7 @@ module RegisterFile (
 			gpr[Addr_write] <= Data_in;
 		end
 	end
-	 
+
 	// read data from register file
 	always @ (*)
 	begin

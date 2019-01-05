@@ -20,7 +20,7 @@ module Writeback (
 		WB_out = 0;
 		RD_out = 0;
 		MEM_out = 0;
-		ALU_out = 0;  
+		ALU_out = 0;
 	end
 
 	//always @ (posedge clk)
@@ -29,7 +29,7 @@ module Writeback (
 		WB_out <= WB_in;
 		RD_out <= RD_in;
 		MEM_out <= MEM_in;
-		ALU_out <= ALU_in;   
+		ALU_out <= ALU_in;
 	end
 
 endmodule

@@ -5,10 +5,10 @@ module InstructionMemory (
 	input wire [31:0] PC,
 	output wire [31:0] instruction,
 	);
-	
+
 	reg [15:0] memory[0:31];
 	integer i;
-	
+
 	initial
 	begin
 		memory[0] <= 16'h0;
@@ -24,9 +24,9 @@ module InstructionMemory (
 			memory[i] <= 16'h0;
 		end
 	end
-	
+
 	assign instruction = memory[PC];
-		
+
 endmodule
 
 `endif /*__INSTRUCTIONMEMORY_V__*/

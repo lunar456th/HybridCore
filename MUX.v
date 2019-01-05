@@ -18,10 +18,10 @@ module MUX (
 	always @ (*)
 	begin
 		case (Sel)
-            2'b00: Out <= A0;
-            2'b01: Out <= A1;
-            2'b10: Out <= A2;
-            2'b11: Out <= A3;
+			2'b00: Out <= A0;
+			2'b01: Out <= A1;
+			2'b10: Out <= A2;
+			2'b11: Out <= A3;
 		endcase
 	end
 

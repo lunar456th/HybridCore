@@ -45,7 +45,7 @@ module ControlUnit (
 
 	//Op
 	assign Op_out[8:7] = tmp2; //WB
-	assign Op_out[6:4] = { beq, lw, sw }; //MEM  
+	assign Op_out[6:4] = { beq, lw, sw }; //MEM
 	assign Op_out[3:0] = tmp1; //EXE
 
 endmodule

@@ -21,7 +21,7 @@ module Arbiter # (
 			base <= 1;
 			core_select <= 0;
 		end
-		else 
+		else
 		begin
 			if (grant_nxt != 0)
 				base <= { grant_nxt[NUM_ENTRIES - 2:0], grant_nxt[NUM_ENTRIES - 1] }; // Rotate left
