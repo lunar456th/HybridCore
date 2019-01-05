@@ -1,3 +1,6 @@
 [submodule "MIG_ExternalMemoryInterface"]
 	path = MIG_ExternalMemoryInterface
 	url = https://github.com/lunar456th/MIG_ExternalMemoryInterface.git
+[submodule "PASC"]
+	path = PASC
+	url = https://github.com/lunar456th/PASC.git
