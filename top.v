@@ -20,9 +20,7 @@ module main (
 	input clk,
 	input reset
 	);
-	
-	//integer count;
-	
+
 	// Fetch Wire Declarations
 	wire [31:0] PC_In;
 	wire [31:0] PC_Next;
@@ -136,12 +134,14 @@ module main (
 	end
 
 	//---//
-	
 
 	// Instantiations
 	InstructionMemory unit1(
 		.PC(PC),
-		.instruction(Instrn)
+		.instruction(Instrn),
+		.memory_rden(memory_rden),
+		.memory_addr(memory_addr),
+		.memory_read_val(memory_read_val)
 	);
 
 	Fetch unit2(
