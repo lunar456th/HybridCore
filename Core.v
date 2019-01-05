@@ -16,9 +16,16 @@
 
 `include "MUX.v"
 
-module main (
+module Core (
 	input clk,
-	input reset
+	input reset,
+    input core_enable,
+    output core_request,
+    output [31:0] memory_addr,
+    output memory_rden,
+    output memory_wren,
+    input [31:0] memory_read_val,
+    output [31:0] memory_write_val
 	);
 
 	// Fetch Wire Declarations
@@ -136,7 +143,7 @@ module main (
 	//---//
 
 	// Instantiations
-	InstructionMemory unit1(
+	InstructionMemory Stage1(
 		.PC(PC),
 		.instruction(Instrn),
 		.memory_rden(memory_rden),
@@ -144,7 +151,7 @@ module main (
 		.memory_read_val(memory_read_val)
 	);
 
-	Fetch unit2(
+	Fetch Stage2(
 		.clk(clk),
 		.pc_in(PC_In),
 		.instrn_in(Instrn),
@@ -154,7 +161,7 @@ module main (
 		.NPC_out(NPC_out)
 	);
 
-	HazardDetection unit3(
+	HazardDetection Stage3(
 		.decode_MEM1(decode_MEM[1]),
 		.decode_RT(decode_RT),
 		.RS_in_decoder(RS_in_decoder),
@@ -164,7 +171,7 @@ module main (
 		.hazard_hz(hazard_hz)
 	);
 
-	ControlUnit unit4(
+	ControlUnit Stage4(
 		.Opcode(Opcode),
 		.Op_out(ControlUnit_Out),
 		.jmp(jmp),
@@ -176,7 +183,7 @@ module main (
 		.ls(ls)
 	);
 
-	RegisterFile unit5(
+	RegisterFile Stage5(
 		.clk(clk),
 		.write_enable(mem_WBout[0]),
 		.Addr_write(mem_RDout),
@@ -187,7 +194,7 @@ module main (
 		.DataB(regmem_DataB)
 	);
 
-	Decode unit6(
+	Decode Stage6(
 		.clk(clk),
 		.decoder_in(decoder_in),
 		.dataA_in(regmem_DataA),
@@ -205,7 +212,7 @@ module main (
 		.imm_out(decode_imm)
 	);
 
-	MUX muxA(
+	MUX _MuxA(
 		.A0(decode_dataA),
 		.A1(write_data),
 		.A2(exe_ALUout),
@@ -214,7 +221,7 @@ module main (
 		.Out(ALUout_A)
 	);
 
-	MUX muxB(
+	MUX _MuxB(
 		.A0(muxB_in),
 		.A1(write_data),
 		.A2(exe_ALUout),
@@ -223,7 +230,7 @@ module main (
 		.Out(ALUout_B)
 	);
 
-	ForwardingUnit unit7(
+	ForwardingUnit Stage7(
 		.exe_RDout(exe_RDout),
 		.mem_RDout(mem_RDout),
 		.decode_RS(decode_RS),
@@ -235,7 +242,7 @@ module main (
 		.ForwardB(FwdOut_B)
 	);
 
-	ALUControl unit8(
+	ALUControl Stage8(
 		.operation(decode_imm[5:0]),
 		.ALU_Op(decode_EXE[1:0]),
 		.andi(push_andi),
@@ -245,7 +252,7 @@ module main (
 		.ALU_control(ALU_Control)
 	);
 
-	ALU unit9(
+	ALU Stage9(
 		.DataA(ALUout_A),
 		.DataB(ALUout_B),
 		.ALU_control(ALU_Control),
@@ -253,7 +260,7 @@ module main (
 		.Result(ALU_out)
 	);
 
-	Execute unit10(
+	Execute Stage10(
 		.clk(clk),
 		.WB_in(decode_WB),
 		.MEM_in(decode_MEM),
@@ -267,7 +274,7 @@ module main (
 		.WriteData_out(exe_WriteData)
 	);
 
-	DataMemory unit11(
+	DataMemory Stage11(
 		.Address(exe_ALUout),
 		.Write_data(exe_WriteData),
 		.Mem_Write(exe_MEMout[0]),
@@ -275,7 +282,7 @@ module main (
 		.Read_data(ReadOut_DataMem)
 	);
 
-	Writeback unit12(
+	Writeback Stage12(
 		.clk(clk),
 		.WB_in(exe_WBout),
 		.RD_in(exe_RDout),
