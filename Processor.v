@@ -1,18 +1,14 @@
-module main # (
-	)	(
-
-
 module Processor # (
-    parameter NUM_CORES = 16,
+	parameter NUM_CORES = 16,
 	parameter DQ_WIDTH = 16,
 	parameter ECC_TEST = "OFF",
 	parameter nBANK_MACHS = 4,
 	parameter ADDR_WIDTH = 28,
 	parameter nCK_PER_CLK = 4
 	)	(
-	input clk, // 클락
-	input reset, // 리셋
-	
+	input clk,
+	input reset,
+
 	// AXI Memory In/Out Ports
 	inout [15:0] ddr3_dq,
 	inout [1:0] ddr3_dqs_n,
@@ -28,62 +24,42 @@ module Processor # (
 	output [0:0] ddr3_cke,
 	output [0:0] ddr3_cs_n,
 	output [1:0] ddr3_dm,
-	output [0:0] ddr3_odt,
-
-	// AXI Memory 와 소통하는 in/out
-	output [31:0] device_addr,
-	output device_read_en,
-	output device_write_en,
-	input [31:0] device_data_in,
-	output [31:0] device_data_out,
-
-	output reg [$clog2(NUM_CORES)-1:0] device_core_id,
-
-	input axi_we, // response
-	input [31:0] axi_addr, // response
-	input [31:0] axi_data, // response
-	output [31:0] axi_q // ?
+	output [0:0] ddr3_odt
 	);
 
 	wire [31:0] memory_addr;
 	wire memory_rden;
 	wire memory_wren;
-	wire [31:0] memory_read_val;
+	reg [31:0] memory_read_val;
 	wire [31:0] memory_write_val;
+
+	reg [$clog2(NUM_CORES)-1:0] device_core_id;
 
 	wire [31:0] core_memory_addr[0:NUM_CORES-1];
 	wire core_memory_rden [NUM_CORES-1:0];
 	wire core_memory_wren [NUM_CORES-1:0];
 	wire [31:0] core_memory_write_val[0:NUM_CORES-1];
 
-	wire [NUM_CORES-1:0] core_enable; // 글로벌 메모리에 접근할 권한 같음. 잘은 모르겠음, 지금은 안쓰임
-	wire [NUM_CORES-1:0] core_request; // 글로벌 메모리 접근 요청, 지금은 안쓰임
+	wire [NUM_CORES-1:0] core_enable;
+	wire [NUM_CORES-1:0] core_request;
 
 	assign memory_addr = core_memory_addr[device_core_id];
 	assign memory_rden = core_memory_rden[device_core_id];
 	assign memory_wren = core_memory_wren[device_core_id];
 	assign memory_write_val = core_memory_write_val[device_core_id];
 
-    assign device_addr = memory_addr;
-    assign device_read_en = memory_rden;
-    assign device_write_en = memory_wren;
-    assign memory_read_val = device_data_in;
-    assign device_data_out = memory_write_val;
-	
 
 	genvar i;
 	generate
 		for (i = 0; i < NUM_CORES; i = i + 1)
 		begin
-			Core # (
-				.LOCAL_MEMORY_SIZE(LOCAL_MEMORY_SIZE)
-			) _Core (
+			Core _Core (
 				.clk(clk),
 				.reset(reset),
 				.core_enable(core_enable[i]),
 				.core_request(core_request[i]),
 				.memory_addr(core_memory_addr[i]),
-				.memory_wren(core_memory_wren[i]),    
+				.memory_wren(core_memory_wren[i]),
 				.memory_rden(core_memory_rden[i]),
 				.memory_write_val(core_memory_write_val[i]),
 				.memory_read_val(memory_read_val)
@@ -93,24 +69,24 @@ module Processor # (
 
 
 	// Convert one-hot to binary = encoding?
-    integer oh_index;
-    always @*
-    begin : convert
-        device_core_id = 0;
-        for (oh_index = 0; oh_index < NUM_CORES; oh_index = oh_index + 1)
-        begin
-            if (core_enable[oh_index])
-            begin : convert
-                 // Use 'or' to avoid synthesizing priority encoder
-                device_core_id = device_core_id | oh_index[$clog2(NUM_CORES) - 1:0];
-            end
-        end
-    end
+	integer oh_index;
+	always @ (*)
+	begin
+		device_core_id = 0;
+		for (oh_index = 0; oh_index < NUM_CORES; oh_index = oh_index + 1)
+		begin
+			if (core_enable[oh_index])
+			begin
+				 // Use 'or' to avoid synthesizing priority encoder
+				device_core_id = device_core_id | oh_index[$clog2(NUM_CORES) - 1:0];
+			end
+		end
+	end
 
 
 	// Dynamic Arbitration for accessing external memory using arbiter
 	Arbiter # (
-		.NUM_CORES(NUM_CORES)
+		.NUM_ENTRIES(NUM_CORES)
 	) _Arbiter(
 		.clk(clk),
 		.reset(reset),
@@ -119,14 +95,15 @@ module Processor # (
 	);
 
 
-	localparam STATE_IDLE = 3'd0;
-	localparam STATE_WRITE = 3'd1;
-	localparam STATE_WRITE_DONE = 3'd2;
-	localparam STATE_READ = 3'd3;
-	localparam STATE_READ_DONE = 3'd4;
-	localparam STATE_PARK = 3'd5;
+	localparam STATE_INIT = 3'd0;
+	localparam STATE_READY = 3'd1;
+	localparam STATE_READ = 3'd2;
+	localparam STATE_READ_DONE = 3'd3;
+	localparam STATE_WRITE = 3'd4;
+	localparam STATE_WRITE_DONE = 3'd5;
+	// localparam STATE_CHECK = 3'd6;
 
-	reg [127:0] data_to_write = { 32'hcafecafe, 32'hfaceface, 32'hbabebabe, 32'hABCD1234 };
+	reg [127:0] data_to_write = { 32'hcafecafe, 32'hfaceface, 32'hbabebabe, 32'hbeadbead };
 	reg [127:0] data_read_from_memory = 128'd0;
 	reg [9:0] pwr_on_rst_ctr = 1023;
 
@@ -134,7 +111,7 @@ module Processor # (
 	localparam PAYLOAD_WIDTH = (ECC_TEST == "OFF") ? DATA_WIDTH : DQ_WIDTH;
 	localparam APP_DATA_WIDTH = 2 * nCK_PER_CLK * PAYLOAD_WIDTH;
 	localparam APP_MASK_WIDTH = APP_DATA_WIDTH / 8;
-	
+
 	wire init_calib_complete;
 
 	reg [ADDR_WIDTH-1:0] app_addr = 0;
@@ -234,6 +211,122 @@ module Processor # (
 	);
 
 	// 메모리 요청 트래픽에 따라 메모리를 read/write하는 state machine이 필요.
+	reg [2:0] state = STATE_INIT;
 
+	localparam CMD_WRITE = 3'b000;
+	localparam CMD_READ = 3'b001;
+
+	always @ (posedge ui_clk)
+	begin
+		if (ui_clk_sync_rst)
+		begin
+			state <= STATE_INIT;
+			app_en <= 0;
+			app_wdf_wren <= 0;
+		end
+		else
+		begin
+			case (state)
+				STATE_INIT:
+				begin
+					if (init_calib_complete)
+					begin
+						state <= STATE_READY;
+					end
+				end
+
+				STATE_READY:
+				begin
+					state <= STATE_READY;
+				end
+
+				STATE_READ:
+				begin
+					if (app_rdy)
+					begin
+						app_en <= 1'b1;
+						app_addr <= memory_addr;
+						app_cmd <= CMD_READ;
+						state <= STATE_READ_DONE;
+					end
+				end
+
+				STATE_READ_DONE:
+				begin
+					if (app_rdy & app_en)
+					begin
+						app_en <= 0;
+					end
+
+					if (app_rd_data_valid)
+					begin
+						memory_read_val <= app_rd_data;
+						state <= STATE_READY;
+					end
+				end
+
+				STATE_WRITE:
+				begin
+					if (app_rdy & app_wdf_rdy)
+					begin
+						app_en <= 1'b1;
+						app_wdf_wren <= 1'b1;
+						app_addr <= memory_addr;
+						app_cmd <= CMD_WRITE;
+						app_wdf_data <= memory_write_val;
+						state <= STATE_WRITE_DONE;
+					end
+				end
+
+				STATE_WRITE_DONE:
+				begin
+					if (app_rdy & app_en)
+					begin
+						app_en <= 0;
+					end
+
+					if (app_wdf_rdy & app_wdf_wren)
+					begin
+						app_wdf_wren <= 0;
+					end
+
+					if (~app_en & ~app_wdf_wren)
+					begin
+						state <= STATE_READY;
+					end
+				end
+
+				// STATE_CHECK:
+				// begin
+					// if (data_to_write == data_read_from_memory)
+					// begin
+						// led_pass <= 1;
+					// end
+					// else if (data_to_write != data_read_from_memory)
+					// begin
+						// led_fail <= 1;
+					// end
+				// end
+
+				default:
+				begin
+					state <= STATE_READY;
+				end
+			endcase
+		end
+	end
+
+	always @ (device_core_id)
+	begin
+		if (memory_rden)
+		begin
+			state <= STATE_READ;
+		end
+
+		if (memory_wren)
+		begin
+			state <= STATE_WRITE;
+		end
+	end
 
 endmodule
