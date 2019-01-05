@@ -4,7 +4,7 @@
 `define __EXECUTE_V__
 
 module Execute (
-	input wire clk,
+	//input wire clk,
 	input wire [1:0] WB_in,
 	input wire [2:0] MEM_in,
 	input wire [4:0] RD_in,
@@ -25,7 +25,8 @@ module Execute (
 		ALU_out = 0;
 	end
 
-	always @ (posedge clk)
+	//always @ (posedge clk)
+	always @ (*)
 	begin
 		WB_out <= WB_in;
 		MEM_out <= MEM_in;

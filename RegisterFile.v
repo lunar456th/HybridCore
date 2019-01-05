@@ -2,7 +2,7 @@
 `define __REGISTERFILE_V__
 
 module RegisterFile (
-	input wire clk,
+	//input wire clk,
 	input wire write_enable,
 	input wire [4:0] Addr_write,
 	input wire [4:0] Addr_A,
@@ -49,7 +49,8 @@ module RegisterFile (
 	end
 
 	// write data into register file
-	always @ (posedge clk)
+	//always @ (posedge clk)
+	always @ (*)
 	begin
 		if (write_enable)
 		begin
