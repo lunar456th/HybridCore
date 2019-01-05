@@ -1,3 +1,6 @@
+`ifndef __CORE_V__
+`define __CORE_V__
+
 `include "ALU.v"
 `include "ALUControl.v"
 
@@ -21,13 +24,15 @@ module Core (
 	input reset,
 	input core_enable,
 	output core_request,
+
 	output [31:0] memory_addr,
 	output memory_rden,
 	output memory_wren,
 	input [31:0] memory_read_val,
-	output [31:0] memory_write_val
+	output [31:0] memory_write_val,
+	input memory_response
 	);
-
+	
 	// Fetch Wire Declarations
 	wire [31:0] PC_In;
 	wire [31:0] PC_Next;
@@ -146,9 +151,10 @@ module Core (
 	InstructionMemory Stage1(
 		.PC(PC),
 		.instruction(Instrn),
-		.memory_rden(memory_rden),
 		.memory_addr(memory_addr),
-		.memory_read_val(memory_read_val)
+		.memory_rden(memory_rden),
+		.memory_read_val(memory_read_val),
+		.memory_response(memory_response)
 	);
 
 	Fetch Stage2(
@@ -280,6 +286,12 @@ module Core (
 		.Mem_Write(exe_MEMout[0]),
 		.Mem_Read(exe_MEMout[1]),
 		.Read_data(ReadOut_DataMem)
+		.memory_addr(memory_addr),
+		.memory_rden(memory_rden),
+		.memory_wren(memory_wren),
+		.memory_read_val(memory_read_val),
+		.memory_write_val(memory_write_val),
+		.memory_response(memory_response)
 	);
 
 	Writeback Stage12(
@@ -295,3 +307,5 @@ module Core (
 	);
 
 endmodule
+
+`endif /*__CORE_V__*/

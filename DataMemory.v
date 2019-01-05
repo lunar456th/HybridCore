@@ -7,37 +7,42 @@ module DataMemory (
 	input wire Mem_Write,
 	input wire Mem_Read,
 	output wire [31:0] Read_data
+
+	output [31:0] memory_addr,
+	output memory_rden,
+	output memory_wren,
+	input [31:0] memory_read_val,
+	output [31:0] memory_write_val
+	input wire memory_response
 	);
-
-	reg [15:0] memory[0:31];
-	integer i;
-
-	initial
-	begin
-		memory[0] <= 16'h0;
-		memory[1] <= 16'h0;
-		memory[2] <= 16'h0;
-		memory[3] <= 16'h0;
-		memory[4] <= 16'h0;
-		memory[5] <= 16'h0;
-		memory[6] <= 16'h0;
-		memory[7] <= 16'h0;
-		for(i = 8; i < 16; i = i + 1)
-		begin
-			memory[i] <= 16'h0;
-		end
-	end
 
 	always @ (Address)
 	begin
-		if (Mem_Write)
-		begin
-			memory[Address] <= Write_data;
-		end
-
 		if (Mem_Read)
 		begin
-			Read_data <= memory[Address];
+			memory_addr <= Address;
+			memory_rden <= 1'b1;
+		end
+
+		if (Mem_Write)
+		begin
+			memory_addr <= Address;
+			memory_wren <= 1'b1;
+			memory_write_val <= Write_data;
+		end
+	end
+
+	always @ (posedge memory_response)
+	begin
+		if (memory_rden)
+		begin
+			Read_data <= memory_read_val;
+			memory_rden <= 1'b0;
+		end
+
+		if (memory_wren)
+		begin
+			memory_wren <= 1'b0;
 		end
 	end
 

@@ -3,29 +3,27 @@
 
 module InstructionMemory (
 	input wire [31:0] PC,
-	output wire [31:0] instruction,
+	output reg [31:0] instruction,
+	output reg [31:0] memory_addr,
+	output reg memory_rden,
+	input wire [31:0] memory_read_val,
+	input wire memory_response
 	);
 
-	reg [15:0] memory[0:31];
-	integer i;
-
-	initial
+	always @ (PC)
 	begin
-		memory[0] <= 16'h0;
-		memory[1] <= 16'h0;
-		memory[2] <= 16'h0;
-		memory[3] <= 16'h0;
-		memory[4] <= 16'h0;
-		memory[5] <= 16'h0;
-		memory[6] <= 16'h0;
-		memory[7] <= 16'h0;
-		for(i = 8; i < 16; i = i + 1)
-		begin
-			memory[i] <= 16'h0;
-		end
+		memory_addr <= PC;
+		memory_rden <= 1'b1;
 	end
 
-	assign instruction = memory[PC];
+	always @ (posedge memory_response)
+	begin
+		if (memory_rden)
+		begin
+			instruction <= memory_read_val;
+			memory_rden <= 1'b0;
+		end
+	end
 
 endmodule
 

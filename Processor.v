@@ -1,3 +1,6 @@
+`include "Arbiter.v"
+`include "Core.v"
+
 module Processor # (
 	parameter NUM_CORES = 16,
 	parameter DQ_WIDTH = 16,
@@ -6,25 +9,25 @@ module Processor # (
 	parameter ADDR_WIDTH = 28,
 	parameter nCK_PER_CLK = 4
 	)	(
-	input clk,
-	input reset,
+	input wire clk,
+	input wire reset,
 
 	// AXI Memory In/Out Ports
-	inout [15:0] ddr3_dq,
-	inout [1:0] ddr3_dqs_n,
-	inout [1:0] ddr3_dqs_p,
-	output [13:0] ddr3_addr,
-	output [2:0] ddr3_ba,
-	output ddr3_ras_n,
-	output ddr3_cas_n,
-	output ddr3_we_n,
-	output ddr3_reset_n,
-	output [0:0] ddr3_ck_p,
-	output [0:0] ddr3_ck_n,
-	output [0:0] ddr3_cke,
-	output [0:0] ddr3_cs_n,
-	output [1:0] ddr3_dm,
-	output [0:0] ddr3_odt
+	inout wire [15:0] ddr3_dq,
+	inout wire [1:0] ddr3_dqs_n,
+	inout wire [1:0] ddr3_dqs_p,
+	output wire [13:0] ddr3_addr,
+	output wire [2:0] ddr3_ba,
+	output wire ddr3_ras_n,
+	output wire ddr3_cas_n,
+	output wire ddr3_we_n,
+	output wire ddr3_reset_n,
+	output wire [0:0] ddr3_ck_p,
+	output wire [0:0] ddr3_ck_n,
+	output wire [0:0] ddr3_cke,
+	output wire [0:0] ddr3_cs_n,
+	output wire [1:0] ddr3_dm,
+	output wire [0:0] ddr3_odt
 	);
 
 	wire [31:0] memory_addr;
@@ -32,6 +35,7 @@ module Processor # (
 	wire memory_wren;
 	reg [31:0] memory_read_val;
 	wire [31:0] memory_write_val;
+	reg memory_response;
 
 	reg [$clog2(NUM_CORES)-1:0] device_core_id;
 
@@ -62,7 +66,8 @@ module Processor # (
 				.memory_wren(core_memory_wren[i]),
 				.memory_rden(core_memory_rden[i]),
 				.memory_write_val(core_memory_write_val[i]),
-				.memory_read_val(memory_read_val)
+				.memory_read_val(memory_read_val),
+				.memory_response(memory_response)
 			);
 		end
 	endgenerate
@@ -237,6 +242,7 @@ module Processor # (
 
 				STATE_READY:
 				begin
+					memory_response <= 1'b0;
 					state <= STATE_READY;
 				end
 
@@ -261,6 +267,7 @@ module Processor # (
 					if (app_rd_data_valid)
 					begin
 						memory_read_val <= app_rd_data;
+						memory_response <= 1'b1;
 						state <= STATE_READY;
 					end
 				end
@@ -292,6 +299,7 @@ module Processor # (
 
 					if (~app_en & ~app_wdf_wren)
 					begin
+						memory_response <= 1'b1;
 						state <= STATE_READY;
 					end
 				end
