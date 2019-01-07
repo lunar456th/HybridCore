@@ -4,3 +4,6 @@
 [submodule "PASC"]
 	path = PASC
 	url = https://github.com/lunar456th/PASC.git
+[submodule "UART"]
+	path = UART
+	url = https://github.com/lunar456th/UART.git
