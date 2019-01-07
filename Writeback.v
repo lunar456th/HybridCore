@@ -4,7 +4,7 @@
 `define __WRITEBACK_V__
 
 module Writeback (
-	input wire clk,
+	// input wire clk,
 	input wire [1:0] WB_in,
 	input wire [4:0] RD_in,
 	input wire [31:0] MEM_in,
@@ -23,7 +23,8 @@ module Writeback (
 		ALU_out = 0;  
 	end
 
-	always @ (posedge clk)
+	// always @ (posedge clk)
+	always @ (*)
 	begin
 		WB_out <= WB_in;
 		RD_out <= RD_in;

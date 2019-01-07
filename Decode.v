@@ -4,7 +4,7 @@
 `define __DECODE_V__
 
 module Decode (
-	input wire clk,
+	// input wire clk,
 	input wire [8:0] decoder_in,
 	input wire [31:0] dataA_in,
 	input wire [31:0] dataB_in,
@@ -34,7 +34,8 @@ module Decode (
 		imm_out = 0;
 	end
 
-	always @ (posedge clk)
+	// always @ (posedge clk)
+	always @ (*)
 	begin
 		WB_out <= decoder_in[8:7];
 		MEM_out <= decoder_in[6:4];

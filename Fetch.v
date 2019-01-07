@@ -4,7 +4,7 @@
 `define __FETCH_V__
 
 module Fetch (
-	input wire clk,
+	// input wire clk,
 	input wire [31:0] pc_in,
 	input wire [31:0] instrn_in,
 	input wire flush_in,
@@ -19,7 +19,8 @@ module Fetch (
 		NPC_out = 0;
 	end
 
-	always @ (posedge clk)
+	// always @ (posedge clk)
+	always @ (*)
 	begin
 		if (flush_in)
 		begin

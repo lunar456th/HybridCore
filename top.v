@@ -145,7 +145,7 @@ module main (
 	);
 
 	Fetch unit2(
-		.clk(clk),
+		// .clk(clk),
 		.pc_in(PC_In),
 		.instrn_in(Instrn),
 		.flush_in(reset),
@@ -177,7 +177,7 @@ module main (
 	);
 
 	RegisterFile unit5(
-		.clk(clk),
+		// .clk(clk),
 		.write_enable(mem_WBout[0]),
 		.Addr_write(mem_RDout),
 		.Addr_A(instr_out[25:21]),
@@ -188,7 +188,7 @@ module main (
 	);
 
 	Decode unit6(
-		.clk(clk),
+		// .clk(clk),
 		.decoder_in(decoder_in),
 		.dataA_in(regmem_DataA),
 		.dataB_in(regmem_DataB),
@@ -254,7 +254,7 @@ module main (
 	);
 
 	Execute unit10(
-		.clk(clk),
+		// .clk(clk),
 		.WB_in(decode_WB),
 		.MEM_in(decode_MEM),
 		.RD_in(exe_RD_in),
@@ -276,7 +276,7 @@ module main (
 	);
 
 	Writeback unit12(
-		.clk(clk),
+		// .clk(clk),
 		.WB_in(exe_WBout),
 		.RD_in(exe_RDout),
 		.MEM_in(ReadOut_DataMem),
