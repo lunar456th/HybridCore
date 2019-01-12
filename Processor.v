@@ -1,3 +1,6 @@
+`ifndef __PROCESSOR_V__
+`define __PROCESSOR_V__
+
 `include "Arbiter.v"
 `include "Core.v"
 
@@ -31,10 +34,10 @@ module Processor # (
 	);
 
 	wire [31:0] memory_addr;
-	wire memory_rden;
 	wire memory_wren;
-	reg [31:0] memory_read_val;
+	wire memory_rden;
 	wire [31:0] memory_write_val;
+	reg [31:0] memory_read_val;
 	reg memory_response;
 
 	reg [$clog2(NUM_CORES)-1:0] device_core_id;
@@ -43,6 +46,7 @@ module Processor # (
 	wire core_memory_rden [NUM_CORES-1:0];
 	wire core_memory_wren [NUM_CORES-1:0];
 	wire [31:0] core_memory_write_val[0:NUM_CORES-1];
+	wire core_memory_response[0:NUM_CORES-1];
 
 	wire [NUM_CORES-1:0] core_enable;
 	wire [NUM_CORES-1:0] core_request;
@@ -51,7 +55,7 @@ module Processor # (
 	assign memory_rden = core_memory_rden[device_core_id];
 	assign memory_wren = core_memory_wren[device_core_id];
 	assign memory_write_val = core_memory_write_val[device_core_id];
-
+	assign memory_response = core_memory_response[device_core_id];
 
 	genvar i;
 	generate
@@ -67,11 +71,10 @@ module Processor # (
 				.memory_rden(core_memory_rden[i]),
 				.memory_write_val(core_memory_write_val[i]),
 				.memory_read_val(memory_read_val),
-				.memory_response(memory_response)
+				.memory_response(core_memory_response[i])
 			);
 		end
 	endgenerate
-
 
 	// Convert one-hot to binary = encoding?
 	integer oh_index;
@@ -88,7 +91,6 @@ module Processor # (
 		end
 	end
 
-
 	// Dynamic Arbitration for accessing external memory using arbiter
 	Arbiter # (
 		.NUM_ENTRIES(NUM_CORES)
@@ -99,14 +101,12 @@ module Processor # (
 		.core_select(core_enable)
 	);
 
-
 	localparam STATE_INIT = 3'd0;
 	localparam STATE_READY = 3'd1;
 	localparam STATE_READ = 3'd2;
 	localparam STATE_READ_DONE = 3'd3;
 	localparam STATE_WRITE = 3'd4;
 	localparam STATE_WRITE_DONE = 3'd5;
-	// localparam STATE_CHECK = 3'd6;
 
 	reg [127:0] data_to_write = { 32'hcafecafe, 32'hfaceface, 32'hbabebabe, 32'hbeadbead };
 	reg [127:0] data_read_from_memory = 128'd0;
@@ -154,7 +154,6 @@ module Processor # (
 	reg [7:0] calib_tap_val;
 	reg calib_tap_load_done;
 `endif
-
 
 	// External Memory Interface
 	ExternalMemory _ExternalMemory
@@ -304,18 +303,6 @@ module Processor # (
 					end
 				end
 
-				// STATE_CHECK:
-				// begin
-					// if (data_to_write == data_read_from_memory)
-					// begin
-						// led_pass <= 1;
-					// end
-					// else if (data_to_write != data_read_from_memory)
-					// begin
-						// led_fail <= 1;
-					// end
-				// end
-
 				default:
 				begin
 					state <= STATE_READY;
@@ -338,3 +325,5 @@ module Processor # (
 	end
 
 endmodule
+
+`endif /*__PROCESSOR_V__*/

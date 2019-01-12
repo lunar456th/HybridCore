@@ -1,71 +1,25 @@
-`ifndef __ALU_CONTROL_V__
-`define __ALU_CONTROL_V__
+`ifndef __ALUCONTROL_V__
+`define __ALUCONTROL_V__
 
 module ALUControl (
-	input wire [5:0] operation,
-	input wire [1:0] ALU_Op,
-	input wire andi,
-	input wire ori,
-	input wire addi,
-	input wire push_ls,
-	output reg [2:0] ALU_control
+	input wire [1:0] AluOp,
+	input wire [5:0] FnField, // for R - type instructions
+	output reg [3:0] AluCtrl
 	);
 
-	///////////////////////////Compute ALU control from the output given from the control unit//////////
-	initial
+	always @ (AluOp or FnField)
 	begin
-		ALU_control = 0;
-	end
-
-	always @ (ALU_Op or operation or andi or ori or addi or push_ls)
-	begin
-		case (ALU_Op)
-			2'b10: //R Type
-			begin
-				if (operation == 6'b100100)
-				begin
-					ALU_control <= 3'b000; //and
-				end
-				if (operation == 6'b100101)
-				begin
-					ALU_control <= 3'b001; //or
-				end
-				if (operation == 6'b100000)
-				begin
-					ALU_control <= 3'b010; //add
-				end
-				if (operation == 6'b011000)
-				begin
-					ALU_control <= 3'b011; //multi
-				end
-				if (operation == 6'b100011)
-				begin
-					ALU_control <= 3'b110; //sub
-				end
-			end
-
-			2'b00: //I type
-			begin
-				if (andi)
-				begin
-					ALU_control <= 3'b000; //andi
-				end
-				if (ori)
-				begin
-					ALU_control <= 3'b001; //ori
-				end
-				if (addi)
-				begin
-					ALU_control <= 3'b010; //addi
-				end
-				if (push_ls)
-				begin
-					ALU_control <= 3'b010; //addi
-				end
-			end
+		casex({ AluOp, FnField })
+			8'b00_xxxxxx: AluCtrl <= 4'b0010; // lw / sw
+			8'b01_xxxxxx: AluCtrl <= 4'b0110; // beq
+			8'b1x_xx0000: AluCtrl <= 4'b0010; // add
+			8'b1x_xx0010: AluCtrl <= 4'b0110; // sub
+			8'b1x_xx0100: AluCtrl <= 4'b0000; // and
+			8'b1x_xx0101: AluCtrl <= 4'b0001; // or
+			8'b1x_xx1010: AluCtrl <= 4'b0111; // slt
 		endcase
 	end
 
 endmodule
 
-`endif /*__ALU_CONTROL_V__*/
+`endif /*__ALUCONTROL_V__*/

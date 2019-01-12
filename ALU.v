@@ -2,23 +2,24 @@
 `define __ALU_V__
 
 module ALU (
-	input wire [31:0] DataA,
-	input wire [31:0] DataB,
-	input wire [2:0] ALU_control,
-	input wire hazard_hz,
-	output reg [31:0] Result
+	input wire [31:0] opA,
+	input wire [31:0] opB,
+	input wire [3:0] ALUop,
+	output reg [31:0] result,
+	output wire zero // 1 if result is 0
 	);
 
-	// perform operation according to the control from ALU control unit
-	always @ (ALU_control or DataA or DataB)
+	assign zero = (result == 0);
+
+	always @ (ALUop or opA or opB)
 	begin
-		case (ALU_control)
-			3'b000: Result = (DataA & DataB); // logical and
-			3'b001: Result = (DataA | DataB); // logical or
-			3'b010: Result = (DataA + DataB); // addition
-			3'b011: Result = (DataA * DataB); // multiply
-			3'b110: Result = (DataA - DataB); // subtract
-			default: Result = 32'b0; // Default
+		case(ALUop)
+			4'b0000: result = opA & opB;
+			4'b0001: result = opA | opB;
+			4'b0010: result = opA + opB;
+			4'b0110: result = opA - opB;
+			4'b0111: result = opA < opB ? 1 : 0; // slt
+			4'b1100: result = ~(opA | opB);
 		endcase
 	end
 

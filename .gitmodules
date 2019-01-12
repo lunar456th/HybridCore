@@ -4,3 +4,6 @@
 [submodule "PASC"]
 	path = PASC
 	url = https://github.com/lunar456th/PASC.git
+[submodule "MIPS-single-cycle"]
+	path = MIPS-single-cycle
+	url = https://github.com/lunar456th/MIPS-single-cycle.git
