@@ -7,3 +7,7 @@
 [submodule "MIPS-single-cycle"]
 	path = MIPS-single-cycle
 	url = https://github.com/lunar456th/MIPS-single-cycle.git
+[submodule "MIPS-Verilog"]
+	path = MIPS-Verilog
+	url = https://github.com/lunar456th/MIPS-Verilog.git
+	branch = fourth
